@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "description": "Tezos smart contracts for Warden",
+  "scripts": {
+    "escrow:deploy": "completium-cli deploy ./escrow.arl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@matthewdowns:wardenfinance/contracts.git"
+  },
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@taquito/signer": "^8.1.1",
+    "@taquito/taquito": "^8.1.1"
+  }
+}

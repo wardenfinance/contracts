@@ -1,0 +1,50 @@
+archetype escrow
+
+// Placeholder values to be replaced prior to originating a new contract
+// Regex for addresses: /@tz1placeholderplaceholderplacejAYjjX/g
+// Regex for price: /123456789utz/g
+// Regex for deadline: /946684800/g (replace with UTC epoch)
+variable buyer : role  = @tz1placeholderplaceholderplacejAYjjX
+variable seller : role = @tz1placeholderplaceholderplacejAYjjX
+variable oracle : role = @tz1placeholderplaceholderplacejAYjjX
+variable price : tez = 123456789utz
+variable deadline : date = 2000-01-01T00:00:00 // compiles to 946684800
+
+states =
+ | Created initial
+ | Aborted   with { i1 : balance = 0tz; }
+ | Confirmed with { i2 : balance = price; }
+ | Canceled  with { i3 : balance = 0tz; }
+ | Completed with { i4 : balance = 0tz; }
+
+transition abort () {
+  called by buyer or seller
+
+  from Created
+  to Aborted
+}
+
+transition confirm () {
+  from Created
+  to Confirmed when { balance = price }
+}
+
+transition complete () {
+  called by oracle
+
+  from Confirmed
+  to Completed when { now < deadline }
+  with effect {
+    transfer price to seller
+  }
+}
+
+transition cancel () {
+  called by oracle
+
+  from Confirmed
+  to Canceled
+  with effect {
+    transfer price to buyer
+  }
+}

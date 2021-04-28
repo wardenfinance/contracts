@@ -1,0 +1,207 @@
+# (Pair "tz1placeholderplaceholderplacejAYjjX" (Pair "tz1placeholderplaceholderplacejAYjjX" (Pair "tz1placeholderplaceholderplacejAYjjX" (Pair 123456789 (Pair 946684800 0)))))
+{
+  storage (pair (address %buyer) (pair (address %seller) (pair (address %oracle) (pair (mutez %price) (pair (timestamp %deadline) (nat %_state))))));
+  parameter (or (unit %abort) (or (unit %confirm) (or (unit %complete) (unit %cancel))));
+  code { NIL operation;
+         DIG 1;
+         UNPAIR;
+         DIP { UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP };
+         IF_LEFT
+           { DROP;
+             DIG 4;
+             DUP;
+             DUG 5;
+             SENDER;
+             COMPARE;
+             EQ;
+             DIG 6;
+             DUP;
+             DUG 7;
+             SENDER;
+             COMPARE;
+             EQ;
+             OR;
+             NOT;
+             IF
+               { PUSH string "InvalidCaller";
+                 FAILWITH }
+               {  };
+             DUP;
+             DUP;
+             PUSH nat 0;
+             COMPARE;
+             EQ;
+             IF
+               { PUSH nat 1;
+                 DIP { DIG 1; DROP };
+                 DUG 1 }
+               { PUSH string "InvalidState";
+                 FAILWITH };
+             DROP;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             DIG 1;
+             PAIR }
+           { IF_LEFT
+               { DROP;
+                 DUP;
+                 DUP;
+                 PUSH nat 0;
+                 COMPARE;
+                 EQ;
+                 IF
+                   { DIG 3;
+                     DUP;
+                     DUG 4;
+                     BALANCE;
+                     COMPARE;
+                     EQ;
+                     IF
+                       { PUSH nat 2;
+                         DIP { DIG 1; DROP };
+                         DUG 1 }
+                       {  } }
+                   { PUSH string "InvalidState";
+                     FAILWITH };
+                 DROP;
+                 SWAP;
+                 PAIR;
+                 SWAP;
+                 PAIR;
+                 SWAP;
+                 PAIR;
+                 SWAP;
+                 PAIR;
+                 SWAP;
+                 PAIR;
+                 DIG 1;
+                 PAIR }
+               { IF_LEFT
+                   { DROP;
+                     DIG 3;
+                     DUP;
+                     DUG 4;
+                     SENDER;
+                     COMPARE;
+                     EQ;
+                     NOT;
+                     IF
+                       { PUSH string "InvalidCaller";
+                         FAILWITH }
+                       {  };
+                     DUP;
+                     DUP;
+                     PUSH nat 2;
+                     COMPARE;
+                     EQ;
+                     IF
+                       { DIG 2;
+                         DUP;
+                         DUG 3;
+                         NOW;
+                         COMPARE;
+                         LT;
+                         IF
+                           { DIG 7;
+                             DUP;
+                             DUG 8;
+                             DIG 6;
+                             DUP;
+                             DUG 7;
+                             CONTRACT unit;
+                             IF_NONE
+                               { PUSH string "BadContract";
+                                 FAILWITH }
+                               {  };
+                             DIG 5;
+                             DUP;
+                             DUG 6;
+                             UNIT;
+                             TRANSFER_TOKENS;
+                             CONS;
+                             DIP { DIG 7; DROP };
+                             DUG 7;
+                             PUSH nat 4;
+                             DIP { DIG 1; DROP };
+                             DUG 1 }
+                           {  } }
+                       { PUSH string "InvalidState";
+                         FAILWITH };
+                     DROP;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     DIG 1;
+                     PAIR }
+                   { DROP;
+                     DIG 3;
+                     DUP;
+                     DUG 4;
+                     SENDER;
+                     COMPARE;
+                     EQ;
+                     NOT;
+                     IF
+                       { PUSH string "InvalidCaller";
+                         FAILWITH }
+                       {  };
+                     DUP;
+                     DUP;
+                     PUSH nat 2;
+                     COMPARE;
+                     EQ;
+                     IF
+                       { DIG 7;
+                         DUP;
+                         DUG 8;
+                         DIG 7;
+                         DUP;
+                         DUG 8;
+                         CONTRACT unit;
+                         IF_NONE
+                           { PUSH string "BadContract";
+                             FAILWITH }
+                           {  };
+                         DIG 5;
+                         DUP;
+                         DUG 6;
+                         UNIT;
+                         TRANSFER_TOKENS;
+                         CONS;
+                         DIP { DIG 7; DROP };
+                         DUG 7;
+                         PUSH nat 3;
+                         DIP { DIG 1; DROP };
+                         DUG 1 }
+                       { PUSH string "InvalidState";
+                         FAILWITH };
+                     DROP;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     SWAP;
+                     PAIR;
+                     DIG 1;
+                     PAIR } } } };
+}
+
