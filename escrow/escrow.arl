@@ -1,24 +1,28 @@
 archetype escrow
 
-// Placeholder values to be replaced prior to originating a new contract
-// Regex for addresses: /@tz1placeholderplaceholderplacejAYjjX/g
-// Regex for price: /123456789utz/g
-// Regex for deadline: /946684800/g (replace with UTC epoch)
-variable buyer : role  = @tz1placeholderplaceholderplacejAYjjX
-variable seller : role = @tz1placeholderplaceholderplacejAYjjX
-variable oracle : role = @tz1placeholderplaceholderplacejAYjjX
-variable price : tez = 123456789utz
+// Regex for title: /TITLE/
+// Regex for description: /some\("DESCRIPTION"\)/
+// Regex for addresses: /tz1placeholderplaceholderplacejAYjjX/
+// Regex for seller price and oracle fee: /123456789/
+// Regex for deadline (replace with UTC epoch): /946684800/
+variable title : string = "TITLE"
+variable description : option<string> = some("DESCRIPTION")
+variable buyer_address : role  = @tz1placeholderplaceholderplacejAYjjX
+variable seller_address : role = @tz2placeholderplaceholderplacejAYjjX
+variable seller_price : tez = 123456789utz
+variable oracle_address : role = @tz3placeholderplaceholderplacejAYjjX
+variable oracle_fee : tez = 123456789utz
 variable deadline : date = 2000-01-01T00:00:00 // compiles to 946684800
 
 states =
  | Created initial
  | Aborted   with { i1 : balance = 0tz; }
- | Confirmed with { i2 : balance = price; }
+ | Confirmed with { i2 : balance = seller_price; }
  | Canceled  with { i3 : balance = 0tz; }
  | Completed with { i4 : balance = 0tz; }
 
 transition abort () {
-  called by buyer or seller
+  called by buyer_address or seller_address
 
   from Created
   to Aborted
@@ -26,25 +30,41 @@ transition abort () {
 
 transition confirm () {
   from Created
-  to Confirmed when { balance = price }
+  to Confirmed when { balance = seller_price }
 }
 
 transition complete () {
-  called by oracle
+  called by oracle_address
 
   from Confirmed
   to Completed when { now < deadline }
   with effect {
-    transfer price to seller
+    var seller_price_after_oracle_fee = seller_price - oracle_fee;
+    transfer seller_price_after_oracle_fee to seller_address;
+    transfer oracle_fee to oracle_address;
   }
 }
 
 transition cancel () {
-  called by oracle
+  called by oracle_address
 
   from Confirmed
   to Canceled
   with effect {
-    transfer price to buyer
+    transfer seller_price to buyer_address
+  }
+}
+
+specification {
+  contract invariant s1 {
+    buyer_address <> seller_address
+  }
+
+  contract invariant s2 {
+    buyer_address <> oracle_address
+  }
+
+  contract invariant s3 {
+    seller_price > oracle_fee
   }
 }

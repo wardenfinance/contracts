@@ -14,10 +14,13 @@ module Escrow_storage
    | ECancel
   
   type _field =
-   | FBuyer
-   | FSeller
-   | FOracle
-   | FPrice
+   | FTitle
+   | FDescription
+   | FBuyer_address
+   | FSeller_address
+   | FSeller_price
+   | FOracle_address
+   | FOracle_fee
    | FDeadline
    | F_state
   
@@ -26,10 +29,13 @@ module Escrow_storage
                                    type _field = _field
   
   type _storage = {
-    mutable buyer : role;
-    mutable seller : role;
-    mutable oracle : role;
-    mutable price : tez;
+    mutable title : arstring;
+    mutable description : option arstring;
+    mutable buyer_address : role;
+    mutable seller_address : role;
+    mutable seller_price : tez;
+    mutable oracle_address : role;
+    mutable oracle_fee : tez;
     mutable deadline : int;
     mutable _state : nat;
     mutable _ops : L.list operation;
@@ -43,10 +49,13 @@ module Escrow_storage
     _entry : option _entry;
     mutable _tr : Tr._traces 
   } by {
-    buyer = "tz1placeholderplaceholderplacejAYjjX";
-    seller = "tz1placeholderplaceholderplacejAYjjX";
-    oracle = "tz1placeholderplaceholderplacejAYjjX";
-    price = 123456789;
+    title = "TITLE";
+    description = Some "DESCRIPTION";
+    buyer_address = "tz1placeholderplaceholderplacejAYjjX";
+    seller_address = "tz2placeholderplaceholderplacejAYjjX";
+    seller_price = 123456789;
+    oracle_address = "tz3placeholderplaceholderplacejAYjjX";
+    oracle_fee = 123456789;
     deadline = 946684800;
     _state = 0;
     _ops = L.Nil;
@@ -67,10 +76,13 @@ module Escrow_storage
     result = _s_storage  
   }
   = {
-      buyer = _s_storage.buyer;
-      seller = _s_storage.seller;
-      oracle = _s_storage.oracle;
-      price = _s_storage.price;
+      title = _s_storage.title;
+      description = _s_storage.description;
+      buyer_address = _s_storage.buyer_address;
+      seller_address = _s_storage.seller_address;
+      seller_price = _s_storage.seller_price;
+      oracle_address = _s_storage.oracle_address;
+      oracle_fee = _s_storage.oracle_fee;
       deadline = _s_storage.deadline;
       _state = _s_storage._state;
       _ops = _s_storage._ops;
@@ -110,7 +122,7 @@ module Escrow
    _s._tr = L.Nil  
   }
   = let _s_init = _cp_storage (_s) in
-    if not (str_eq (_s._caller) _s.buyer || str_eq (_s._caller) _s.seller) then begin 
+    if not (str_eq (_s._caller) _s.buyer_address || str_eq (_s._caller) _s.seller_address) then begin 
       raise InvalidCaller  
     end;
     let _tmp = _s._state in
@@ -137,7 +149,7 @@ module Escrow
   = let _s_init = _cp_storage (_s) in
     let _tmp = _s._state in
     if 0 = _tmp then begin 
-      if _s._balance = _s.price then begin 
+      if _s._balance = _s.seller_price then begin 
         _s._state <- 2  
       end  
     end else begin 
@@ -160,14 +172,17 @@ module Escrow
    _s._tr = L.Nil  
   }
   = let _s_init = _cp_storage (_s) in
-    if not (str_eq (_s._caller) _s.oracle) then begin 
+    if not (str_eq (_s._caller) _s.oracle_address) then begin 
       raise InvalidCaller  
     end;
     let _tmp = _s._state in
     if 2 = _tmp then begin 
       if _s._now < _s.deadline then begin 
-        _s._ops <- L.Cons (_mk_transfer (_s.seller) (_s.price)) _s._ops;
-        _s._balance <- _s._balance - _s.price;
+        let seller_price_after_oracle_fee = _s.seller_price - _s.oracle_fee in
+        _s._ops <- L.Cons (_mk_transfer (_s.seller_address) (seller_price_after_oracle_fee)) _s._ops;
+        _s._balance <- _s._balance - seller_price_after_oracle_fee;
+        _s._ops <- L.Cons (_mk_transfer (_s.oracle_address) (_s.oracle_fee)) _s._ops;
+        _s._balance <- _s._balance - _s.oracle_fee;
         _s._state <- 4  
       end  
     end else begin 
@@ -190,13 +205,13 @@ module Escrow
    _s._tr = L.Nil  
   }
   = let _s_init = _cp_storage (_s) in
-    if not (str_eq (_s._caller) _s.oracle) then begin 
+    if not (str_eq (_s._caller) _s.oracle_address) then begin 
       raise InvalidCaller  
     end;
     let _tmp = _s._state in
     if 2 = _tmp then begin 
-      _s._ops <- L.Cons (_mk_transfer (_s.buyer) (_s.price)) _s._ops;
-      _s._balance <- _s._balance - _s.price;
+      _s._ops <- L.Cons (_mk_transfer (_s.buyer_address) (_s.seller_price)) _s._ops;
+      _s._balance <- _s._balance - _s.seller_price;
       _s._state <- 3  
     end else begin 
       raise InvalidState  

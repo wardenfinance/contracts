@@ -3,7 +3,7 @@
 
 ## Roles
 
-### buyer
+### buyer_address
 
 | Attribute              | Value  |
 |----------------|---|---|
@@ -11,32 +11,32 @@
 | Address        | tz1placeholderplaceholderplacejAYjjX  |
 
 
-### seller
+### seller_address
 
 | Attribute              | Value  |
 |----------------|---|---|
 | Kind           | variable  |
-| Address        | tz1placeholderplaceholderplacejAYjjX  |
+| Address        | tz2placeholderplaceholderplacejAYjjX  |
 
 
-### oracle
+### oracle_address
 
 | Attribute              | Value  |
 |----------------|---|---|
 | Kind           | variable  |
-| Address        | tz1placeholderplaceholderplacejAYjjX  |
+| Address        | tz3placeholderplaceholderplacejAYjjX  |
 
 
 ## Transitions
 
 ### abort
-`called by ` (buyer or seller)
+`called by ` (buyer_address or seller_address)
 
 ### confirm
 
 ### complete
-`called by ` oracle
+`called by ` oracle_address
 
 ### cancel
-`called by ` oracle
+`called by ` oracle_address
 
