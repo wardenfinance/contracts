@@ -30,7 +30,7 @@ module Escrow_storage
   
   type _storage = {
     mutable title : arstring;
-    mutable description : option arstring;
+    mutable description : arstring;
     mutable buyer_address : role;
     mutable seller_address : role;
     mutable seller_price : tez;
@@ -48,9 +48,20 @@ module Escrow_storage
     _selfaddress : address;
     _entry : option _entry;
     mutable _tr : Tr._traces 
+  } invariant {
+    [@expl:s1]
+    buyer_address <> seller_address 
+  }
+  invariant {
+    [@expl:s2]
+    buyer_address <> oracle_address 
+  }
+  invariant {
+    [@expl:s3]
+    seller_price > oracle_fee  
   } by {
     title = "TITLE";
-    description = Some "DESCRIPTION";
+    description = "DESCRIPTION";
     buyer_address = "tz1placeholderplaceholderplacejAYjjX";
     seller_address = "tz2placeholderplaceholderplacejAYjjX";
     seller_price = 123456789;

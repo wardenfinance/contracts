@@ -1,12 +1,12 @@
 archetype escrow
 
 // Regex for title: /TITLE/
-// Regex for description: /some\("DESCRIPTION"\)/
+// Regex for description: /DESCRIPTION/
 // Regex for addresses: /tz1placeholderplaceholderplacejAYjjX/
 // Regex for seller price and oracle fee: /123456789/
 // Regex for deadline (replace with UTC epoch): /946684800/
 variable title : string = "TITLE"
-variable description : option<string> = some("DESCRIPTION")
+variable description : string = "DESCRIPTION"
 variable buyer_address : role  = @tz1placeholderplaceholderplacejAYjjX
 variable seller_address : role = @tz2placeholderplaceholderplacejAYjjX
 variable seller_price : tez = 123456789utz

@@ -1,6 +1,6 @@
-# (Pair "TITLE" (Pair (Some "DESCRIPTION") (Pair "tz1placeholderplaceholderplacejAYjjX" (Pair "tz2placeholderplaceholderplacejAYjjX" (Pair 123456789 (Pair "tz3placeholderplaceholderplacejAYjjX" (Pair 123456789 (Pair 946684800 0))))))))
+# (Pair "TITLE" (Pair "DESCRIPTION" (Pair "tz1placeholderplaceholderplacejAYjjX" (Pair "tz2placeholderplaceholderplacejAYjjX" (Pair 123456789 (Pair "tz3placeholderplaceholderplacejAYjjX" (Pair 123456789 (Pair 946684800 0))))))))
 {
-  storage (pair (string %title) (pair (option %description string) (pair (address %buyer_address) (pair (address %seller_address) (pair (mutez %seller_price) (pair (address %oracle_address) (pair (mutez %oracle_fee) (pair (timestamp %deadline) (nat %_state)))))))));
+  storage (pair (string %title) (pair (string %description) (pair (address %buyer_address) (pair (address %seller_address) (pair (mutez %seller_price) (pair (address %oracle_address) (pair (mutez %oracle_fee) (pair (timestamp %deadline) (nat %_state)))))))));
   parameter (or (unit %abort) (or (unit %confirm) (or (unit %complete) (unit %cancel))));
   code { NIL operation;
          DIG 1;
