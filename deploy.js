@@ -4,9 +4,18 @@ const { existsSync, readFileSync } = require('fs');
 const { join } = require('path');
 
 const contractName = process.argv[2];
-if (!['escrow'].includes(contractName)) throw new Error('Contract name must be one of: escrow');
 
-const basePath = join(__dirname, contractName);
+let subdirName;
+switch(contractName) {
+    case 'auction':
+    case 'escrow':
+        subdirName = 'dynamic';
+        break;
+    default:
+        throw new Error('Contract name must be one of: auction, escrow');
+}
+
+const basePath = join(__dirname, subdirName, contractName);
 const michelsonPath = join(basePath, `${contractName}.tz`);
 const michelsonStoragePath = join(basePath, `${contractName}.storage.tz`);
 if (!existsSync(michelsonPath) || !existsSync(michelsonStoragePath)) throw new Error(`No compiled michelson code found in paths ${michelsonPath} and ${michelsonStoragePath}.`);

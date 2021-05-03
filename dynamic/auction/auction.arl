@@ -1,0 +1,60 @@
+archetype auction(
+    auctioneer : role,
+    initial_bid : tez,
+    deadline : date
+)
+
+states =
+  | Created   initial
+  | Started   with { i1 : now < deadline; }
+  | Completed with { i2 : now >= deadline; }
+
+transition start () {
+    called by auctioneer
+
+    from Created
+    to Started
+}
+
+transition complete () {
+    from Started
+    to Completed
+    with effect {
+        for b in bid.select(value <> highest_bid) do
+            transfer bid[b].value to b;
+        done;
+        transfer balance to auctioneer;
+    }    
+}
+
+asset bid identified by bidder {
+    bidder : address;
+    value  : tez;
+}
+
+variable highest_bid : tez = initial_bid
+
+entry place_bid () {
+    require {
+        place_bid_c1 : state = Started;
+        place_bid_c2 : transferred > highest_bid
+    }
+
+    effect {
+        bid.add({
+            bidder = caller;
+            value = transferred
+        });
+        highest_bid := max(transferred, highest_bid);
+    }
+}
+
+specification {
+    contract invariant s1 {
+        forall b in bid, b.bidder <> auctioneer
+    }
+
+    contract invariant s2 {
+        forall b in bid, balance > b.value
+    }
+}

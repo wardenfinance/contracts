@@ -1,0 +1,324 @@
+module Auction_storage
+  use archetype.Lib
+  
+  use list.List as L
+  
+  use archetype.Field as F
+  
+  use archetype.View as V
+  
+  use export int.MinMax
+  
+  type _asset =
+   | ABid
+  
+  type _entry =
+   | EStart
+   | EComplete
+   | EPlace_bid
+  
+  type _field =
+   | FAuctioneer
+   | FInitial_bid
+   | FDeadline
+   | FHighest_bid
+   | F_state
+   | FMetadata
+   | FBidder
+   | FValue
+  
+  clone archetype.Trace as Tr with type _asset = _asset,
+                                   type _entry = _entry,
+                                   type _field = _field
+  
+  let function eq_map0 (e1 : (arstring, bytes)) (e2 : (arstring, bytes)) : bool
+  = match (e1 , e2) with
+    | ((e10),(e11)),((e20),(e21)) -> if ((str_eq e10 e20) && (str_eq e11 e21)) then begin 
+                                       true  
+                                     end else begin 
+                                       false  
+                                     end
+    |( _),( _) -> false 
+    end
+  
+  let function le_map0 (e1 : arstring) (e2 : arstring) : bool
+  = str_le e1 e2
+  
+  clone archetype.Collection as Map0 with type t = (arstring, bytes),
+                                          type tk = arstring,
+                                          val keyt = fst,
+                                          val eqt = eq_map0,
+                                          val lek = le_map0
+  
+  type bid = {
+    bidder : address;
+    value : tez 
+  }
+  
+  let function eq_bid_key (k1 : address) (k2 : address) : bool
+  = str_eq k1 k2
+  
+  let function le_bid_key (k1 : address) (k2 : address) : bool
+  = str_le k1 k2
+  
+  let function eq_bid (a1 : bid) (a2 : bid) : bool
+  = (let a1_bidder = a1.bidder in
+    let a2_bidder = a2.bidder in
+    str_eq a1_bidder a2_bidder && let a1_value = a1.value in
+    let a2_value = a2.value in
+    a1_value = a2_value)
+  
+  let mk_default_bid () : bid
+  = {
+      bidder = "";
+      value = 0
+    }
+  
+  clone archetype.View as View_bid with type tk = address,
+                                        val eqk = eq_bid_key
+  
+  clone archetype.Field as Field_bid with type tk = address,
+                                          val eqk = eq_bid_key,
+                                          val lek = le_bid_key,
+                                          type view = View_bid.view,
+                                          val vmk = View_bid.mk,
+                                          val velts = View_bid.elts,
+                                          val vcontains = View_bid.contains
+  
+  clone archetype.Collection as Bid with type tk = address,
+                                         val eqk = eq_bid_key,
+                                         val lek = le_bid_key,
+                                         type t = bid,
+                                         val keyt = bidder,
+                                         val eqt = eq_bid,
+                                         type view = View_bid.view,
+                                         val vmk = View_bid.mk,
+                                         val velts = View_bid.elts,
+                                         val vcontains = View_bid.contains,
+                                         val vcard = View_bid.card,
+                                         type field = Field_bid.field,
+                                         val felts = Field_bid.elts,
+                                         val fcontains = Field_bid.contains
+  
+  let function select_bid_1 (a : bid) : bool
+  ensures {
+    [@expl:select_bid_1_post]
+    result = (a.value <> _s.highest_bid)  
+  }
+  = a.value <> _s.highest_bid
+  
+  type _storage = {
+    mutable auctioneer : role;
+    mutable initial_bid : tez;
+    mutable deadline : int;
+    mutable highest_bid : tez;
+    mutable _state : nat;
+    mutable _bid_assets : Bid.collection;
+    mutable _bid_assets_added : Bid.collection;
+    mutable _bid_assets_removed : Bid.collection;
+    mutable metadata : Map0.collection;
+    mutable _ops : L.list operation;
+    mutable _balance : tez;
+    _transferred : tez;
+    _caller : address;
+    _source : address;
+    _now : date;
+    _chainid : chain_id;
+    _selfaddress : address;
+    _entry : option _entry;
+    mutable _tr : Tr._traces 
+  } invariant {
+    [@expl:s1]
+    forall b : bid.
+    Bid.mem b _bid_assets ->
+    _balance > b.value   
+  } by {
+    auctioneer = auctioneer;
+    initial_bid = initial_bid;
+    deadline = deadline;
+    highest_bid = initial_bid;
+    _state = 0;
+    _bid_assets = Bid.from_list (L.Nil);
+    _bid_assets_added = Bid.empty;
+    _bid_assets_removed = Bid.empty;
+    metadata = Map0.from_list (L.Cons (("" , "74657a6f732d73746f726167653a68657265")) (L.Cons (("here" , "7b0a20202020226e616d65223a202241756374696f6e222c0a20202020226465736372697074696f6e223a202241756374696f6e20636f6e7472616374207769746820646561646c696e65206265747765656e20626964646572732e222c0a202020202276657273696f6e223a2022302e31222c0a20202020226c6963656e7365223a202247504c2d332e30222c0a2020202022617574686f7273223a205b0a2020202020202020224d61747468657720446f776e73203c6d6174746865774077617264656e2e66696e616e63653e220a202020205d2c0a2020202022686f6d6570616765223a202268747470733a2f2f6769746875622e636f6d2f77617264656e66696e616e63652f636f6e7472616374732f64796e616d69632f657363726f77220a7d")) (L.Nil)));
+    _ops = L.Nil;
+    _balance = 0;
+    _transferred = 0;
+    _caller = "";
+    _source = "";
+    _now = 0;
+    _chainid = 0;
+    _selfaddress = "";
+    _entry = None;
+    _tr = L.Nil 
+  }
+  
+  let function _cp_storage (_s_storage : _storage) : _storage
+  ensures {
+    [@expl:cp_1]
+    result = _s_storage  
+  }
+  = {
+      auctioneer = _s_storage.auctioneer;
+      initial_bid = _s_storage.initial_bid;
+      deadline = _s_storage.deadline;
+      highest_bid = _s_storage.highest_bid;
+      _state = _s_storage._state;
+      _bid_assets = _s_storage._bid_assets;
+      _bid_assets_added = _s_storage._bid_assets_added;
+      _bid_assets_removed = _s_storage._bid_assets_removed;
+      metadata = _s_storage.metadata;
+      _ops = _s_storage._ops;
+      _balance = _s_storage._balance;
+      _transferred = _s_storage._transferred;
+      _caller = _s_storage._caller;
+      _source = _s_storage._source;
+      _now = _s_storage._now;
+      _chainid = _s_storage._chainid;
+      _selfaddress = _s_storage._selfaddress;
+      _entry = _s_storage._entry;
+      _tr = _s_storage._tr
+    }
+  
+  val ref _s : _storage
+end
+module Auction
+  use archetype.Lib
+  
+  use list.List as L
+  
+  use Auction_storage
+  
+  let start () : unit
+  raises { InvalidCaller }
+  raises { InvalidState }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EStart) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil 
+  }
+  requires {
+   [@expl:require_bid_added_isempty]
+   Bid.is_empty _s._bid_assets_added 
+  }
+  requires {
+   [@expl:bid_removed_isempty]
+   Bid.is_empty _s._bid_assets_removed  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (str_eq (_s._caller) _s.auctioneer) then begin 
+      raise InvalidCaller  
+    end;
+    let _tmp = _s._state in
+    if 0 = _tmp then begin 
+      _s._state <- 1  
+    end else begin 
+      raise InvalidState  
+    end
+  
+  let complete () : unit
+  raises { NotFound }
+  raises { InvalidState }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EComplete) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil 
+  }
+  requires {
+   [@expl:require_bid_added_isempty]
+   Bid.is_empty _s._bid_assets_added 
+  }
+  requires {
+   [@expl:bid_removed_isempty]
+   Bid.is_empty _s._bid_assets_removed  
+  }
+  = let _s_init = _cp_storage (_s) in
+    let _tmp = _s._state in
+    if 1 = _tmp then begin 
+      let col_loop_complete_0_ = Bid.select select_bid_1 _s._bid_assets in
+      label Before_loop_complete_0 in (for _i_loop_complete_0 = 0 to View_bid.card col_loop_complete_0_ do
+      
+        let b = match View_bid.nth _i_loop_complete_0 col_loop_complete_0_ with
+                | Some _a -> _a
+                | _ -> _s <- _cp_storage (_s_init);
+                       raise NotFound 
+                end in
+        _s._ops <- L.Cons (_mk_transfer (b) ((match Bid.get b _s._bid_assets with
+                                              | Some v -> v
+                                              | _ -> _s <- _cp_storage (_s_init);
+                                                     raise NotFound 
+                                              end).value)) _s._ops;
+        _s._balance <- _s._balance - (match Bid.get b _s._bid_assets with
+                                      | Some v -> v
+                                      | _ -> _s <- _cp_storage (_s_init);
+                                             raise NotFound 
+                                      end).value
+      done);
+      _s._ops <- L.Cons (_mk_transfer (_s.auctioneer) (_s._balance)) _s._ops;
+      _s._balance <- _s._balance - _s._balance;
+      _s._state <- 2  
+    end else begin 
+      raise InvalidState  
+    end
+  
+  let place_bid () : unit
+  raises { InvalidCondition }
+  raises { KeyExist }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EPlace_bid) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil 
+  }
+  requires {
+   [@expl:require_bid_added_isempty]
+   Bid.is_empty _s._bid_assets_added 
+  }
+  requires {
+   [@expl:bid_removed_isempty]
+   Bid.is_empty _s._bid_assets_removed  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (_s._state = 1) then begin 
+      raise InvalidCondition  
+    end;
+    if not (_s._transferred > _s.highest_bid) then begin 
+      raise InvalidCondition  
+    end;
+    match Bid.get (_s._caller) _s._bid_assets with
+    | Some _ -> _s <- _cp_storage (_s_init);
+                raise KeyExist
+    | _ -> _s._bid_assets <- Bid.add ({
+             bidder = _s._caller;
+             value = _s._transferred
+           }) _s._bid_assets;
+           _s._bid_assets_added <- Bid.add ({
+             bidder = _s._caller;
+             value = _s._transferred
+           }) _s._bid_assets_added 
+    end;
+    _s._tr <- L.Cons (Tr.TrAdd_ (ABid)) _s._tr;
+    _s.highest_bid <- max (_s._transferred) (_s.highest_bid)
+end
+

@@ -6,11 +6,12 @@ const contractName = process.argv[2];
 
 let subdirName;
 switch(contractName) {
+    case 'auction':
     case 'escrow':
         subdirName = 'dynamic';
         break;
     default:
-        throw new Error('Contract name must be one of: escrow');
+        throw new Error('Contract name must be one of: auction, escrow');
 }
 
 const basePath = join(__dirname, subdirName, contractName);

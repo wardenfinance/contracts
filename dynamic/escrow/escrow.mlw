@@ -79,11 +79,7 @@ module Escrow_storage
   }
   invariant {
     [@expl:s3]
-    _balance <= price + fee 
-  }
-  invariant {
-    [@expl:s4]
-    _s._now <= deadline  
+    _balance <= price + fee  
   } by {
     title = title;
     description = description;

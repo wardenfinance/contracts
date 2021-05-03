@@ -1,0 +1,10 @@
+{
+    "name": "Auction",
+    "description": "Auction contract with deadline between bidders.",
+    "version": "0.1",
+    "license": "GPL-3.0",
+    "authors": [
+        "Matthew Downs <matthew@warden.finance>"
+    ],
+    "homepage": "https://github.com/wardenfinance/contracts/dynamic/auction"
+}
