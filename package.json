@@ -1,4 +1,5 @@
 {
+  "name": "@wardenfinance/contracts",
   "private": true,
   "description": "Tezos smart contracts for Warden",
   "scripts": {
@@ -9,7 +10,22 @@
     "type": "git",
     "url": "git@matthewdowns:wardenfinance/contracts.git"
   },
+  "keywords": [
+    "smart-contracts",
+    "smart-contract",
+    "tezos",
+    "michelson",
+    "archetype-lang"
+  ],
+  "contributors": [
+    "Matthew Downs <matthew@warden.finance>"
+  ],
   "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/wardenfinance/contracts/issues"
+  },
+  "homepage": "https://warden.finance",
+  "dependencies": {},
   "devDependencies": {
     "@taquito/signer": "^8.1.1",
     "@taquito/taquito": "^8.1.1"

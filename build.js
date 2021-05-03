@@ -3,10 +3,18 @@ const { existsSync } = require('fs');
 const { join } = require('path');
 
 const contractName = process.argv[2];
-if (!['escrow'].includes(contractName)) throw new Error('Contract name must be one of: escrow');
+
+let subdirName;
+switch(contractName) {
+    case 'escrow':
+        subdirName = 'static';
+        break;
+    default:
+        throw new Error('Contract name must be one of: escrow');
+}
 
 const basePath = join(__dirname, contractName);
-const inputPath = join(basePath, `${contractName}.arl`);
+const inputPath = join(basePath, subdirName, `${contractName}.arl`);
 if (!existsSync(inputPath)) throw new Error(`${contractName}.arl does not exist`);
 
 async function compile(targetName, targetExt) {
