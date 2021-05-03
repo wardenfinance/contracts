@@ -1,24 +1,13 @@
 # (Pair auctioneer (Pair initial_bid (Pair deadline (Pair initial_bid (Pair 0 (Pair {  } { Elt "" 0x74657a6f732d73746f726167653a68657265; Elt "here" 0x7b0a20202020226e616d65223a202241756374696f6e222c0a20202020226465736372697074696f6e223a202241756374696f6e20636f6e7472616374207769746820646561646c696e65206265747765656e20626964646572732e222c0a202020202276657273696f6e223a2022302e31222c0a20202020226c6963656e7365223a202247504c2d332e30222c0a2020202022617574686f7273223a205b0a2020202020202020224d61747468657720446f776e73203c6d6174746865774077617264656e2e66696e616e63653e220a202020205d2c0a2020202022686f6d6570616765223a202268747470733a2f2f6769746875622e636f6d2f77617264656e66696e616e63652f636f6e7472616374732f64796e616d69632f61756374696f6e220a7d }))))))
 {
   storage (pair (address %auctioneer) (pair (mutez %initial_bid) (pair (timestamp %deadline) (pair (mutez %highest_bid) (pair (nat %_state) (pair (map %bid address mutez) (big_map %metadata string bytes)))))));
-  parameter (or (unit %start) (or (unit %complete) (unit %place_bid)));
+  parameter (or (unit %complete) (unit %place_bid));
   code { NIL operation;
          DIG 1;
          UNPAIR;
          DIP { UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP };
          IF_LEFT
            { DROP;
-             DIG 6;
-             DUP;
-             DUG 7;
-             SENDER;
-             COMPARE;
-             EQ;
-             NOT;
-             IF
-               { PUSH string "InvalidCaller";
-                 FAILWITH }
-               {  };
              DIG 2;
              DUP;
              DUG 3;
@@ -27,7 +16,90 @@
              COMPARE;
              EQ;
              IF
-               { PUSH nat 1;
+               { NIL address;
+                 NIL address;
+                 DIG 4;
+                 DUP;
+                 DUG 5;
+                 ITER { UNPAIR;
+                        DIG 8;
+                        DUP;
+                        DUG 9;
+                        DIG 2;
+                        DUP;
+                        DUG 3;
+                        COMPARE;
+                        NEQ;
+                        IF
+                          { DIG 2;
+                            DUP;
+                            DUG 3;
+                            DIG 1;
+                            DUP;
+                            DUG 2;
+                            CONS }
+                          { DIG 2;
+                            DUP;
+                            DUG 3 };
+                        DIP { DIG 2; DROP };
+                        DUG 2;
+                        DROP 2 };
+                 ITER { DIG 1;
+                        DUP;
+                        DUG 2;
+                        DIG 1;
+                        DUP;
+                        DUG 2;
+                        CONS;
+                        DIP { DIG 1; DROP };
+                        DUG 1;
+                        DROP };
+                 ITER { DIG 9;
+                        DUP;
+                        DUG 10;
+                        DIG 1;
+                        DUP;
+                        DUG 2;
+                        CONTRACT unit;
+                        IF_NONE
+                          { PUSH string "BadContract";
+                            FAILWITH }
+                          {  };
+                        DIG 5;
+                        DUP;
+                        DUG 6;
+                        DIG 3;
+                        DUP;
+                        DUG 4;
+                        GET;
+                        IF_NONE
+                          { PUSH string "GetNoneValue";
+                            FAILWITH }
+                          {  };
+                        UNIT;
+                        TRANSFER_TOKENS;
+                        CONS;
+                        DIP { DIG 9; DROP };
+                        DUG 9;
+                        DROP };
+                 DIG 8;
+                 DUP;
+                 DUG 9;
+                 DIG 8;
+                 DUP;
+                 DUG 9;
+                 CONTRACT unit;
+                 IF_NONE
+                   { PUSH string "BadContract";
+                     FAILWITH }
+                   {  };
+                 BALANCE;
+                 UNIT;
+                 TRANSFER_TOKENS;
+                 CONS;
+                 DIP { DIG 8; DROP };
+                 DUG 8;
+                 PUSH nat 1;
                  DIP { DIG 3; DROP };
                  DUG 3 }
                { PUSH string "InvalidState";
@@ -47,186 +119,73 @@
              PAIR;
              DIG 1;
              PAIR }
-           { IF_LEFT
-               { DROP;
-                 DIG 2;
-                 DUP;
-                 DUG 3;
-                 DUP;
-                 PUSH nat 1;
-                 COMPARE;
-                 EQ;
-                 IF
-                   { NIL address;
-                     NIL address;
-                     DIG 4;
-                     DUP;
-                     DUG 5;
-                     ITER { UNPAIR;
-                            DIG 8;
-                            DUP;
-                            DUG 9;
-                            DIG 2;
-                            DUP;
-                            DUG 3;
-                            COMPARE;
-                            NEQ;
-                            IF
-                              { DIG 2;
-                                DUP;
-                                DUG 3;
-                                DIG 1;
-                                DUP;
-                                DUG 2;
-                                CONS }
-                              { DIG 2;
-                                DUP;
-                                DUG 3 };
-                            DIP { DIG 2; DROP };
-                            DUG 2;
-                            DROP 2 };
-                     ITER { DIG 1;
-                            DUP;
-                            DUG 2;
-                            DIG 1;
-                            DUP;
-                            DUG 2;
-                            CONS;
-                            DIP { DIG 1; DROP };
-                            DUG 1;
-                            DROP };
-                     ITER { DIG 9;
-                            DUP;
-                            DUG 10;
-                            DIG 1;
-                            DUP;
-                            DUG 2;
-                            CONTRACT unit;
-                            IF_NONE
-                              { PUSH string "BadContract";
-                                FAILWITH }
-                              {  };
-                            DIG 5;
-                            DUP;
-                            DUG 6;
-                            DIG 3;
-                            DUP;
-                            DUG 4;
-                            GET;
-                            IF_NONE
-                              { PUSH string "GetNoneValue";
-                                FAILWITH }
-                              {  };
-                            UNIT;
-                            TRANSFER_TOKENS;
-                            CONS;
-                            DIP { DIG 9; DROP };
-                            DUG 9;
-                            DROP };
-                     DIG 8;
-                     DUP;
-                     DUG 9;
-                     DIG 8;
-                     DUP;
-                     DUG 9;
-                     CONTRACT unit;
-                     IF_NONE
-                       { PUSH string "BadContract";
-                         FAILWITH }
-                       {  };
-                     BALANCE;
-                     UNIT;
-                     TRANSFER_TOKENS;
-                     CONS;
-                     DIP { DIG 8; DROP };
-                     DUG 8;
-                     PUSH nat 2;
-                     DIP { DIG 3; DROP };
-                     DUG 3 }
-                   { PUSH string "InvalidState";
-                     FAILWITH };
-                 DROP;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 DIG 1;
-                 PAIR }
-               { DROP;
-                 PUSH nat 1;
-                 DIG 3;
-                 DUP;
-                 DUG 4;
-                 COMPARE;
-                 EQ;
-                 NOT;
-                 IF
-                   { PUSH string "InvalidCondition: place_bid_c1";
-                     FAILWITH }
-                   {  };
-                 DIG 3;
-                 DUP;
-                 DUG 4;
-                 AMOUNT;
-                 COMPARE;
-                 GT;
-                 NOT;
-                 IF
-                   { PUSH string "InvalidCondition: place_bid_c2";
-                     FAILWITH }
-                   {  };
-                 DIG 1;
+           { DROP;
+             PUSH nat 0;
+             DIG 3;
+             DUP;
+             DUG 4;
+             COMPARE;
+             EQ;
+             NOT;
+             IF
+               { PUSH string "InvalidCondition: place_bid_c1";
+                 FAILWITH }
+               {  };
+             DIG 3;
+             DUP;
+             DUG 4;
+             AMOUNT;
+             COMPARE;
+             GT;
+             NOT;
+             IF
+               { PUSH string "InvalidCondition: place_bid_c2";
+                 FAILWITH }
+               {  };
+             DIG 1;
+             DUP;
+             DUG 2;
+             SENDER;
+             MEM;
+             IF
+               { PUSH string "KeyAlreadyExists";
+                 FAILWITH }
+               { DIG 1;
                  DUP;
                  DUG 2;
-                 SENDER;
-                 MEM;
-                 IF
-                   { PUSH string "KeyAlreadyExists";
-                     FAILWITH }
-                   { DIG 1;
-                     DUP;
-                     DUG 2;
-                     AMOUNT;
-                     SOME;
-                     SENDER;
-                     UPDATE;
-                     DIP { DIG 1; DROP };
-                     DUG 1 };
-                 DIG 3;
-                 DUP;
-                 DUG 4;
                  AMOUNT;
-                 PAIR;
-                 DUP;
-                 UNPAIR;
-                 COMPARE;
-                 LT;
-                 IF
-                   { CDR }
-                   { CAR };
-                 DIP { DIG 3; DROP };
-                 DUG 3;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 SWAP;
-                 PAIR;
-                 DIG 1;
-                 PAIR } } };
+                 SOME;
+                 SENDER;
+                 UPDATE;
+                 DIP { DIG 1; DROP };
+                 DUG 1 };
+             DIG 3;
+             DUP;
+             DUG 4;
+             AMOUNT;
+             PAIR;
+             DUP;
+             UNPAIR;
+             COMPARE;
+             LT;
+             IF
+               { CDR }
+               { CAR };
+             DIP { DIG 3; DROP };
+             DUG 3;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             SWAP;
+             PAIR;
+             DIG 1;
+             PAIR } };
 }
 

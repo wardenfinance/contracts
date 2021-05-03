@@ -13,7 +13,6 @@ module Auction_storage
    | ABid
   
   type _entry =
-   | EStart
    | EComplete
    | EPlace_bid
   
@@ -196,40 +195,6 @@ module Auction
   
   use Auction_storage
   
-  let start () : unit
-  raises { InvalidCaller }
-  raises { InvalidState }
-  requires {
-    [@expl:entry_require]
-    _s._entry = (Some EStart) 
-  }
-  requires {
-   [@expl:empty_ops]
-   _s._ops = L.Nil 
-  }
-  requires {
-   [@expl:empty_trace]
-   _s._tr = L.Nil 
-  }
-  requires {
-   [@expl:require_bid_added_isempty]
-   Bid.is_empty _s._bid_assets_added 
-  }
-  requires {
-   [@expl:bid_removed_isempty]
-   Bid.is_empty _s._bid_assets_removed  
-  }
-  = let _s_init = _cp_storage (_s) in
-    if not (str_eq (_s._caller) _s.auctioneer) then begin 
-      raise InvalidCaller  
-    end;
-    let _tmp = _s._state in
-    if 0 = _tmp then begin 
-      _s._state <- 1  
-    end else begin 
-      raise InvalidState  
-    end
-  
   let complete () : unit
   raises { NotFound }
   raises { InvalidState }
@@ -255,7 +220,7 @@ module Auction
   }
   = let _s_init = _cp_storage (_s) in
     let _tmp = _s._state in
-    if 1 = _tmp then begin 
+    if 0 = _tmp then begin 
       let col_loop_complete_0_ = Bid.select select_bid_1 _s._bid_assets in
       label Before_loop_complete_0 in (for _i_loop_complete_0 = 0 to View_bid.card col_loop_complete_0_ do
       
@@ -277,7 +242,7 @@ module Auction
       done);
       _s._ops <- L.Cons (_mk_transfer (_s.auctioneer) (_s._balance)) _s._ops;
       _s._balance <- _s._balance - _s._balance;
-      _s._state <- 2  
+      _s._state <- 1  
     end else begin 
       raise InvalidState  
     end
@@ -306,7 +271,7 @@ module Auction
    Bid.is_empty _s._bid_assets_removed  
   }
   = let _s_init = _cp_storage (_s) in
-    if not (_s._state = 1) then begin 
+    if not (_s._state = 0) then begin 
       raise InvalidCondition  
     end;
     if not (_s._transferred > _s.highest_bid) then begin 

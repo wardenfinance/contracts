@@ -12,19 +12,11 @@ asset bid identified by bidder {
 variable highest_bid : tez = initial_bid
 
 states =
-  | Created   initial
-  | Started   with { i1 : now < deadline; }
+  | Created initial
   | Completed with { i2 : now >= deadline; }
 
-transition start () {
-    called by auctioneer
-
-    from Created
-    to Started
-}
-
 transition complete () {
-    from Started
+    from Created
     to Completed
     with effect {
         for b in bid.select(value <> highest_bid) do
@@ -36,7 +28,7 @@ transition complete () {
 
 entry place_bid () {
     require {
-        place_bid_c1 : state = Started;
+        place_bid_c1 : state = Created;
         place_bid_c2 : transferred > highest_bid
     }
 

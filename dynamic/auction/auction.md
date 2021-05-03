@@ -12,16 +12,13 @@
 
 ## Transitions
 
-### start
-`called by ` auctioneer
-
 ### complete
 ## entries
 
 ### place_bid
 #### require 
 ##### place_bid_c1
-`(state = Started)`
+`(state = Created)`
 ##### place_bid_c2
 `(transferred > highest_bid)`
 
