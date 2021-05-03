@@ -1,11 +1,11 @@
-# (Pair auctioneer (Pair title (Pair description (Pair image_ipfs_cid (Pair initial_bid (Pair deadline (Pair (Pair title (Pair description image_ipfs_cid)) (Pair initial_bid (Pair 0 (Pair {  } { Elt "" 0x74657a6f732d73746f726167653a68657265; Elt "here" 0x7b0a20202020226e616d65223a202241756374696f6e222c0a20202020226465736372697074696f6e223a202241756374696f6e20636f6e7472616374207769746820646561646c696e65206265747765656e20626964646572732e222c0a202020202276657273696f6e223a2022302e31222c0a20202020226c6963656e7365223a202247504c2d332e30222c0a2020202022617574686f7273223a205b0a2020202020202020224d61747468657720446f776e73203c6d6174746865774077617264656e2e66696e616e63653e220a202020205d2c0a2020202022686f6d6570616765223a202268747470733a2f2f6769746875622e636f6d2f77617264656e66696e616e63652f636f6e7472616374732f64796e616d69632f61756374696f6e220a7d }))))))))))
+# (Pair auctioneer (Pair title (Pair description (Pair image_ipfs_cid (Pair initial_bid (Pair deadline (Pair initial_bid (Pair 0 (Pair {  } { Elt "" 0x74657a6f732d73746f726167653a68657265; Elt "here" 0x7b0a20202020226e616d65223a202241756374696f6e222c0a20202020226465736372697074696f6e223a202241756374696f6e20636f6e7472616374207769746820646561646c696e65206265747765656e20626964646572732e222c0a202020202276657273696f6e223a2022302e31222c0a20202020226c6963656e7365223a202247504c2d332e30222c0a2020202022617574686f7273223a205b0a2020202020202020224d61747468657720446f776e73203c6d6174746865774077617264656e2e66696e616e63653e220a202020205d2c0a2020202022686f6d6570616765223a202268747470733a2f2f6769746875622e636f6d2f77617264656e66696e616e63652f636f6e7472616374732f64796e616d69632f61756374696f6e220a7d })))))))))
 {
-  storage (pair (address %auctioneer) (pair (string %title) (pair (string %description) (pair (string %image_ipfs_cid) (pair (mutez %initial_bid) (pair (timestamp %deadline) (pair (pair %information (string %info_title) (pair (string %info_description) (string %info_image_ipfs_cid))) (pair (mutez %highest_bid) (pair (nat %_state) (pair (map %bid address mutez) (big_map %metadata string bytes)))))))))));
+  storage (pair (address %auctioneer) (pair (string %title) (pair (string %description) (pair (string %image_ipfs_cid) (pair (mutez %initial_bid) (pair (timestamp %deadline) (pair (mutez %highest_bid) (pair (nat %_state) (pair (map %bid address mutez) (big_map %metadata string bytes))))))))));
   parameter (or (unit %complete) (unit %place_bid));
   code { NIL operation;
          DIG 1;
          UNPAIR;
-         DIP { UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP };
+         DIP { UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP };
          IF_LEFT
            { DROP;
              DIG 2;
@@ -54,9 +54,9 @@
                         DIP { DIG 1; DROP };
                         DUG 1;
                         DROP };
-                 ITER { DIG 13;
+                 ITER { DIG 12;
                         DUP;
-                        DUG 14;
+                        DUG 13;
                         DIG 1;
                         DUP;
                         DUG 2;
@@ -79,15 +79,15 @@
                         UNIT;
                         TRANSFER_TOKENS;
                         CONS;
-                        DIP { DIG 13; DROP };
-                        DUG 13;
+                        DIP { DIG 12; DROP };
+                        DUG 12;
                         DROP };
-                 DIG 12;
+                 DIG 11;
                  DUP;
-                 DUG 13;
-                 DIG 12;
+                 DUG 12;
+                 DIG 11;
                  DUP;
-                 DUG 13;
+                 DUG 12;
                  CONTRACT unit;
                  IF_NONE
                    { PUSH string "BadContract";
@@ -97,16 +97,14 @@
                  UNIT;
                  TRANSFER_TOKENS;
                  CONS;
-                 DIP { DIG 12; DROP };
-                 DUG 12;
+                 DIP { DIG 11; DROP };
+                 DUG 11;
                  PUSH nat 1;
                  DIP { DIG 3; DROP };
                  DUG 3 }
                { PUSH string "InvalidState";
                  FAILWITH };
              DROP;
-             SWAP;
-             PAIR;
              SWAP;
              PAIR;
              SWAP;
@@ -181,8 +179,6 @@
                { CAR };
              DIP { DIG 3; DROP };
              DUG 3;
-             SWAP;
-             PAIR;
              SWAP;
              PAIR;
              SWAP;

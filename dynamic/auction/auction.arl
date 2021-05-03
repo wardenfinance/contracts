@@ -7,18 +7,6 @@ archetype auction(
     deadline       : date
 )
 
-record info {
-    info_title : string;
-    info_description : string;
-    info_image_ipfs_cid : string;
-}
-
-variable information : info = {
-    info_title = title;
-    info_description = description;
-    info_image_ipfs_cid = image_ipfs_cid
-}
-
 asset bid identified by bidder {
     bidder : address;
     value  : tez;

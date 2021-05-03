@@ -23,7 +23,6 @@ module Auction_storage
    | FImage_ipfs_cid
    | FInitial_bid
    | FDeadline
-   | FInformation
    | FHighest_bid
    | F_state
    | FMetadata
@@ -33,12 +32,6 @@ module Auction_storage
   clone archetype.Trace as Tr with type _asset = _asset,
                                    type _entry = _entry,
                                    type _field = _field
-  
-  type info = {
-    info_title : arstring;
-    info_description : arstring;
-    info_image_ipfs_cid : arstring 
-  }
   
   let function eq_map0 (e1 : (arstring, bytes)) (e2 : (arstring, bytes)) : bool
   = match (e1 , e2) with
@@ -123,7 +116,6 @@ module Auction_storage
     mutable image_ipfs_cid : arstring;
     mutable initial_bid : tez;
     mutable deadline : int;
-    mutable information : info;
     mutable highest_bid : tez;
     mutable _state : nat;
     mutable _bid_assets : Bid.collection;
@@ -158,11 +150,6 @@ module Auction_storage
     image_ipfs_cid = image_ipfs_cid;
     initial_bid = initial_bid;
     deadline = deadline;
-    information = {
-      info_title = title;
-      info_description = description;
-      info_image_ipfs_cid = image_ipfs_cid
-    };
     highest_bid = initial_bid;
     _state = 0;
     _bid_assets = Bid.from_list (L.Nil);
@@ -193,7 +180,6 @@ module Auction_storage
       image_ipfs_cid = _s_storage.image_ipfs_cid;
       initial_bid = _s_storage.initial_bid;
       deadline = _s_storage.deadline;
-      information = _s_storage.information;
       highest_bid = _s_storage.highest_bid;
       _state = _s_storage._state;
       _bid_assets = _s_storage._bid_assets;
