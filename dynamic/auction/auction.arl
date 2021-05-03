@@ -4,6 +4,13 @@ archetype auction(
     deadline : date
 )
 
+asset bid identified by bidder {
+    bidder : address;
+    value  : tez;
+}
+
+variable highest_bid : tez = initial_bid
+
 states =
   | Created   initial
   | Started   with { i1 : now < deadline; }
@@ -26,13 +33,6 @@ transition complete () {
         transfer balance to auctioneer;
     }    
 }
-
-asset bid identified by bidder {
-    bidder : address;
-    value  : tez;
-}
-
-variable highest_bid : tez = initial_bid
 
 entry place_bid () {
     require {
