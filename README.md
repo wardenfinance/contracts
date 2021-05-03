@@ -2,6 +2,8 @@
 Tezos smart contracts for Warden.
 
 ![GitHub](https://img.shields.io/github/license/wardenfinance/contracts)
+[![Node.js CI](https://github.com/wardenfinance/contracts/actions/workflows/node.js.yml/badge.svg)](https://github.com/wardenfinance/contracts/actions/workflows/node.js.yml)
+[![CodeQL](https://github.com/wardenfinance/contracts/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/wardenfinance/contracts/actions/workflows/codeql-analysis.yml)
 
 ## Static
 
