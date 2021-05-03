@@ -7,8 +7,8 @@ Tezos smart contracts for Warden.
 
 ## Static
 
-Contracts in the _static_ directory are meant for single use-cases. For example, the **escrow** contract can be deployed by anyone when needed - once that contract has outlived its purpose, it will no longer be used.
+Contracts in the _static_ directory are meant for continued use. For example, the **warden** contract is deployed once and used forever (unless an update is necessary).
 
 ## Dynamic
 
-Contracts in the _dynamic_ directory are meant for continued use. For example, the **warden** contract is deployed once and used forever - until an update is necessary.
+Contracts in the _dynamic_ directory are meant for single use-cases. For example, the **escrow** contract can be deployed by anyone when needed - once that contract has outlived its purpose, it will no longer be used.

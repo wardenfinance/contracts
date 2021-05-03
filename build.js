@@ -7,7 +7,7 @@ const contractName = process.argv[2];
 let subdirName;
 switch(contractName) {
     case 'escrow':
-        subdirName = 'static';
+        subdirName = 'dynamic';
         break;
     default:
         throw new Error('Contract name must be one of: escrow');
