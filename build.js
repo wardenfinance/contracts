@@ -13,8 +13,8 @@ switch(contractName) {
         throw new Error('Contract name must be one of: escrow');
 }
 
-const basePath = join(__dirname, contractName);
-const inputPath = join(basePath, subdirName, `${contractName}.arl`);
+const basePath = join(__dirname, subdirName, contractName);
+const inputPath = join(basePath, `${contractName}.arl`);
 if (!existsSync(inputPath)) throw new Error(`${contractName}.arl does not exist`);
 
 async function compile(targetName, targetExt) {
