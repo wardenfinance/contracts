@@ -12,17 +12,23 @@ asset bid identified by bidder {
     value  : tez;
 }
 
-variable highest_bid : tez = initial_bid
+variable highest_bid : tez = 0tz
 
 states =
   | Created initial
-  | Completed with { i2 : now >= deadline; }
+  | Completed
 
 transition complete () {
+    called by auctioneer
+
+    require {
+        complete_c1 : now >= deadline
+    }
+
     from Created
     to Completed
     with effect {
-        for b in bid.select(value <> highest_bid) do
+        for b in bid.select(value < highest_bid) do
             transfer bid[b].value to b;
         done;
         transfer balance to auctioneer;
@@ -32,7 +38,7 @@ transition complete () {
 entry place_bid () {
     require {
         place_bid_c1 : state = Created;
-        place_bid_c2 : transferred > highest_bid
+        place_bid_c2 : transferred > highest_bid;
     }
 
     effect {
@@ -44,12 +50,41 @@ entry place_bid () {
     }
 }
 
+entry increase_bid () {
+    require {
+        increase_bid_c1 : state = Created;
+        increase_bid_c2 : bid.contains(caller);
+        increase_bid_c3 : (bid[caller].value + transferred) > highest_bid
+    }
+    
+    effect {
+        bid.update(caller, {
+            value = (bid[caller].value + transferred)
+        });
+        highest_bid := bid[caller].value + transferred
+    }
+}
+
+entry reclaim_bid () {
+    require {
+        reclaim_bid_c1 : state = Created;
+        reclaim_bid_c2 : bid.contains(caller);
+        reclaim_bid_c3 : bid[caller].value <> highest_bid
+    }
+
+    effect {
+        var reclaim_value = bid[caller].value;
+        bid.remove(caller);
+        transfer reclaim_value to caller;
+    }
+}
+
 specification {
     contract invariant s1 {
         forall b in bid, b.bidder <> auctioneer
     }
 
     contract invariant s2 {
-        forall b in bid, balance > b.value
+        balance = bid.sum(value)
     }
 }

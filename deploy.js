@@ -29,14 +29,14 @@ if (!network || !['mainnet', 'testnet', 'edonet', 'florencenet'].includes(networ
 let rpcUrl;
 switch(network) {
     case 'mainnet':
-        rpcUrl = 'https://mainnet-tezos.giganode.io';
+        rpcUrl = 'https://api.tez.ie/rpc/mainnet';
         break;
     case 'testnet':
     case 'edonet':
-        rpcUrl = 'https://testnet-tezos.giganode.io';
+        rpcUrl = 'https://api.tez.ie/rpc/edonet';
         break;
     case 'florencenet':
-        rpcUrl = 'https://florencenet-tezos.giganode.io';
+        rpcUrl = 'https://api.tez.ie/rpc/florencenet';
         break;
 }
 

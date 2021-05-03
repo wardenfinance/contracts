@@ -15,6 +15,8 @@ module Auction_storage
   type _entry =
    | EComplete
    | EPlace_bid
+   | EIncrease_bid
+   | EReclaim_bid
   
   type _field =
    | FAuctioneer
@@ -105,9 +107,31 @@ module Auction_storage
   let function select_bid_1 (a : bid) : bool
   ensures {
     [@expl:select_bid_1_post]
-    result = (a.value <> _s.highest_bid)  
+    result = (a.value < _s.highest_bid)  
   }
-  = a.value <> _s.highest_bid
+  = a.value < _s.highest_bid
+  
+  let function get_bid_sum1 (a : bid) : int
+  = a.value
+  
+  clone archetype.Sum as BidSum1 with type collection = Bid.collection,
+                                      type view = View_bid.view,
+                                      type t = bid,
+                                      type tk = address,
+                                      val field = get_bid_sum1,
+                                      val view_to_list = Bid.view_to_list,
+                                      val to_view = Bid.to_view,
+                                      val empty = View_bid.empty,
+                                      val contains = View_bid.contains,
+                                      val nth = View_bid.nth,
+                                      val head = View_bid.head,
+                                      val tail = View_bid.tail,
+                                      val card = View_bid.card,
+                                      val add = Bid.add,
+                                      val remove = Bid.remove,
+                                      val set = Bid.set,
+                                      val get = Bid.get,
+                                      val keyt = bidder
   
   type _storage = {
     mutable auctioneer : role;
@@ -140,9 +164,7 @@ module Auction_storage
   }
   invariant {
     [@expl:s2]
-    forall b : bid.
-    Bid.mem b _bid_assets ->
-    _balance > b.value   
+    _balance = (BidSum1.sum (Bid.to_view _bid_assets) _bid_assets)  
   } by {
     auctioneer = auctioneer;
     title = title;
@@ -150,7 +172,7 @@ module Auction_storage
     image_ipfs_cid = image_ipfs_cid;
     initial_bid = initial_bid;
     deadline = deadline;
-    highest_bid = initial_bid;
+    highest_bid = 0;
     _state = 0;
     _bid_assets = Bid.from_list (L.Nil);
     _bid_assets_added = Bid.empty;
@@ -208,6 +230,8 @@ module Auction
   use Auction_storage
   
   let complete () : unit
+  raises { InvalidCaller }
+  raises { InvalidCondition }
   raises { NotFound }
   raises { InvalidState }
   requires {
@@ -231,6 +255,12 @@ module Auction
    Bid.is_empty _s._bid_assets_removed  
   }
   = let _s_init = _cp_storage (_s) in
+    if not (str_eq (_s._caller) _s.auctioneer) then begin 
+      raise InvalidCaller  
+    end;
+    if not (_s._now >= _s.deadline) then begin 
+      raise InvalidCondition  
+    end;
     let _tmp = _s._state in
     if 0 = _tmp then begin 
       let col_loop_complete_0_ = Bid.select select_bid_1 _s._bid_assets in
@@ -303,5 +333,114 @@ module Auction
     end;
     _s._tr <- L.Cons (Tr.TrAdd_ (ABid)) _s._tr;
     _s.highest_bid <- max (_s._transferred) (_s.highest_bid)
+  
+  let increase_bid () : unit
+  raises { InvalidCondition }
+  raises { NotFound }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EIncrease_bid) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil 
+  }
+  requires {
+   [@expl:require_bid_added_isempty]
+   Bid.is_empty _s._bid_assets_added 
+  }
+  requires {
+   [@expl:bid_removed_isempty]
+   Bid.is_empty _s._bid_assets_removed  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (_s._state = 0) then begin 
+      raise InvalidCondition  
+    end;
+    if not (View_bid.contains (_s._caller) (Bid.to_view _s._bid_assets)) then begin 
+      raise InvalidCondition  
+    end;
+    if not ((match Bid.get (_s._caller) _s._bid_assets with
+             | Some v -> v
+             | _ -> _s <- _cp_storage (_s_init);
+                    raise NotFound 
+             end).value + (_s._transferred) > _s.highest_bid) then begin 
+      raise InvalidCondition  
+    end;
+    let bid_ = match Bid.get (_s._caller) _s._bid_assets with
+               | Some v -> v
+               | _ -> _s <- _cp_storage (_s_init);
+                      raise NotFound 
+               end in
+    let bid_ = {
+      bidder = bid_.bidder;
+      value = (match Bid.get (_s._caller) _s._bid_assets with
+               | Some v -> v
+               | _ -> _s <- _cp_storage (_s_init);
+                      raise NotFound 
+               end).value + (_s._transferred)
+    } in
+    _s._bid_assets <- Bid.set (_s._caller) bid_ _s._bid_assets;
+    _s._tr <- L.Cons (Tr.TrUpdate_ (FValue)) _s._tr;
+    _s.highest_bid <- (match Bid.get (_s._caller) _s._bid_assets with
+                       | Some v -> v
+                       | _ -> _s <- _cp_storage (_s_init);
+                              raise NotFound 
+                       end).value + (_s._transferred)
+  
+  let reclaim_bid () : unit
+  raises { InvalidCondition }
+  raises { NotFound }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EReclaim_bid) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil 
+  }
+  requires {
+   [@expl:require_bid_added_isempty]
+   Bid.is_empty _s._bid_assets_added 
+  }
+  requires {
+   [@expl:bid_removed_isempty]
+   Bid.is_empty _s._bid_assets_removed  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (_s._state = 0) then begin 
+      raise InvalidCondition  
+    end;
+    if not (View_bid.contains (_s._caller) (Bid.to_view _s._bid_assets)) then begin 
+      raise InvalidCondition  
+    end;
+    if not ((match Bid.get (_s._caller) _s._bid_assets with
+             | Some v -> v
+             | _ -> _s <- _cp_storage (_s_init);
+                    raise NotFound 
+             end).value <> _s.highest_bid) then begin 
+      raise InvalidCondition  
+    end;
+    let reclaim_value = (match Bid.get (_s._caller) _s._bid_assets with
+                         | Some v -> v
+                         | _ -> _s <- _cp_storage (_s_init);
+                                raise NotFound 
+                         end).value in
+    _s._bid_assets <- Bid.remove (_s._caller) _s._bid_assets;
+    match Bid.get (_s._caller) _s._bid_assets with
+    | Some _a -> _s._bid_assets_removed <- Bid.add _a _s._bid_assets_removed
+    | _ -> () 
+    end;
+    _s._tr <- L.Cons (Tr.TrRm_ (ABid)) _s._tr;
+    _s._ops <- L.Cons (_mk_transfer (_s._caller) (reclaim_value)) _s._ops;
+    _s._balance <- _s._balance - reclaim_value
 end
 
