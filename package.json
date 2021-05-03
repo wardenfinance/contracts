@@ -23,7 +23,6 @@
     "url": "https://github.com/wardenfinance/contracts/issues"
   },
   "homepage": "https://warden.finance",
-  "dependencies": {},
   "devDependencies": {
     "@taquito/signer": "^9.0.0",
     "@taquito/taquito": "^9.0.0"
