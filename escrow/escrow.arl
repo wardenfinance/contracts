@@ -1,28 +1,23 @@
-archetype escrow
-
-// Regex for title: /TITLE/
-// Regex for description: /DESCRIPTION/
-// Regex for addresses: /tz1placeholderplaceholderplacejAYjjX/
-// Regex for seller price and oracle fee: /123456789/
-// Regex for deadline (replace with UTC epoch): /946684800/
-variable title : string = "TITLE"
-variable description : string = "DESCRIPTION"
-variable buyer_address : role  = @tz1placeholderplaceholderplacejAYjjX
-variable seller_address : role = @tz2placeholderplaceholderplacejAYjjX
-variable seller_price : tez = 123456789utz
-variable oracle_address : role = @tz3placeholderplaceholderplacejAYjjX
-variable oracle_fee : tez = 123456789utz
-variable deadline : date = 2000-01-01T00:00:00 // compiles to 946684800
+archetype escrow(
+  title : string,
+  description : string,
+  buyer : role,
+  seller : role,
+  oracle : role,
+  price : tez,
+  fee : tez,
+  deadline : date
+)
 
 states =
  | Created initial
  | Aborted   with { i1 : balance = 0tz; }
- | Confirmed with { i2 : balance = seller_price; }
+ | Confirmed with { i2 : balance = price; }
  | Canceled  with { i3 : balance = 0tz; }
  | Completed with { i4 : balance = 0tz; }
 
 transition abort () {
-  called by buyer_address or seller_address
+  called by buyer or seller
 
   from Created
   to Aborted
@@ -30,41 +25,44 @@ transition abort () {
 
 transition confirm () {
   from Created
-  to Confirmed when { balance = seller_price }
+  to Confirmed when { balance = price + fee }
 }
 
 transition complete () {
-  called by oracle_address
+  called by oracle
 
   from Confirmed
   to Completed when { now < deadline }
   with effect {
-    var seller_price_after_oracle_fee = seller_price - oracle_fee;
-    transfer seller_price_after_oracle_fee to seller_address;
-    transfer oracle_fee to oracle_address;
+    transfer price to seller;
+    transfer fee to oracle;
   }
 }
 
 transition cancel () {
-  called by oracle_address
+  called by oracle
 
   from Confirmed
   to Canceled
   with effect {
-    transfer seller_price to buyer_address
+    transfer price to buyer;
   }
 }
 
 specification {
   contract invariant s1 {
-    buyer_address <> seller_address
+    buyer <> seller
   }
 
   contract invariant s2 {
-    buyer_address <> oracle_address
+    buyer <> oracle
   }
 
   contract invariant s3 {
-    seller_price > oracle_fee
+    balance <= price + fee
+  }
+
+  contract invariant s4 {
+    now <= deadline
   }
 }

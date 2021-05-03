@@ -1,0 +1,10 @@
+{
+    "name": "Escrow",
+    "description": "Escrow contract with deadline between a buyer and a seller, and validated by an oracle.",
+    "version": "0.1",
+    "license": "GPL-3.0",
+    "authors": [
+        "Matthew Downs <matthew@warden.finance>"
+    ],
+    "homepage": "https://warden.finance"
+}
