@@ -1,22 +1,22 @@
-# (Pair title (Pair description (Pair buyer (Pair seller (Pair oracle (Pair price (Pair fee (Pair deadline 0))))))))
+# (Pair title (Pair description (Pair buyer (Pair seller (Pair oracle (Pair price (Pair fee (Pair deadline (Pair 0 { Elt "" 0x74657a6f732d73746f726167653a68657265; Elt "here" 0x7b0a20202020226e616d65223a2022457363726f77222c0a20202020226465736372697074696f6e223a2022457363726f7720636f6e7472616374207769746820646561646c696e65206265747765656e206120627579657220616e6420612073656c6c65722c20616e642076616c69646174656420627920616e206f7261636c652e222c0a202020202276657273696f6e223a2022302e31222c0a20202020226c6963656e7365223a202247504c2d332e30222c0a2020202022617574686f7273223a205b0a2020202020202020224d61747468657720446f776e73203c6d6174746865774077617264656e2e66696e616e63653e220a202020205d2c0a2020202022686f6d6570616765223a202268747470733a2f2f6769746875622e636f6d2f77617264656e66696e616e63652f636f6e7472616374732f64796e616d69632f657363726f77220a7d })))))))))
 {
-  storage (pair (string %title) (pair (string %description) (pair (address %buyer) (pair (address %seller) (pair (address %oracle) (pair (mutez %price) (pair (mutez %fee) (pair (timestamp %deadline) (nat %_state)))))))));
+  storage (pair (string %title) (pair (string %description) (pair (address %buyer) (pair (address %seller) (pair (address %oracle) (pair (mutez %price) (pair (mutez %fee) (pair (timestamp %deadline) (pair (nat %_state) (big_map %metadata string bytes))))))))));
   parameter (or (unit %abort) (or (unit %confirm) (or (unit %complete) (unit %cancel))));
   code { NIL operation;
          DIG 1;
          UNPAIR;
-         DIP { UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP };
+         DIP { UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP; UNPAIR; SWAP };
          IF_LEFT
            { DROP;
-             DIG 5;
+             DIG 6;
              DUP;
-             DUG 6;
+             DUG 7;
              SENDER;
              COMPARE;
              EQ;
-             DIG 7;
+             DIG 8;
              DUP;
-             DUG 8;
+             DUG 9;
              SENDER;
              COMPARE;
              EQ;
@@ -26,18 +26,22 @@
                { PUSH string "InvalidCaller";
                  FAILWITH }
                {  };
+             DIG 1;
              DUP;
+             DUG 2;
              DUP;
              PUSH nat 0;
              COMPARE;
              EQ;
              IF
                { PUSH nat 1;
-                 DIP { DIG 1; DROP };
-                 DUG 1 }
+                 DIP { DIG 2; DROP };
+                 DUG 2 }
                { PUSH string "InvalidState";
                  FAILWITH };
              DROP;
+             SWAP;
+             PAIR;
              SWAP;
              PAIR;
              SWAP;
@@ -58,26 +62,28 @@
              PAIR }
            { IF_LEFT
                { DROP;
+                 DIG 1;
                  DUP;
+                 DUG 2;
                  DUP;
                  PUSH nat 0;
                  COMPARE;
                  EQ;
                  IF
-                   { DIG 3;
+                   { DIG 4;
                      DUP;
-                     DUG 4;
-                     DIG 5;
+                     DUG 5;
+                     DIG 6;
                      DUP;
-                     DUG 6;
+                     DUG 7;
                      ADD;
                      BALANCE;
                      COMPARE;
                      EQ;
                      IF
                        { PUSH nat 2;
-                         DIP { DIG 1; DROP };
-                         DUG 1 }
+                         DIP { DIG 2; DROP };
+                         DUG 2 }
                        {  } }
                    { PUSH string "InvalidState";
                      FAILWITH };
@@ -98,13 +104,15 @@
                  PAIR;
                  SWAP;
                  PAIR;
+                 SWAP;
+                 PAIR;
                  DIG 1;
                  PAIR }
                { IF_LEFT
                    { DROP;
-                     DIG 4;
+                     DIG 5;
                      DUP;
-                     DUG 5;
+                     DUG 6;
                      SENDER;
                      COMPARE;
                      EQ;
@@ -113,22 +121,43 @@
                        { PUSH string "InvalidCaller";
                          FAILWITH }
                        {  };
+                     DIG 1;
                      DUP;
+                     DUG 2;
                      DUP;
                      PUSH nat 2;
                      COMPARE;
                      EQ;
                      IF
-                       { DIG 2;
+                       { DIG 3;
                          DUP;
-                         DUG 3;
+                         DUG 4;
                          NOW;
                          COMPARE;
                          LT;
                          IF
-                           { DIG 10;
+                           { DIG 11;
                              DUP;
+                             DUG 12;
+                             DIG 8;
+                             DUP;
+                             DUG 9;
+                             CONTRACT unit;
+                             IF_NONE
+                               { PUSH string "BadContract";
+                                 FAILWITH }
+                               {  };
+                             DIG 7;
+                             DUP;
+                             DUG 8;
+                             UNIT;
+                             TRANSFER_TOKENS;
+                             CONS;
+                             DIP { DIG 11; DROP };
                              DUG 11;
+                             DIG 11;
+                             DUP;
+                             DUG 12;
                              DIG 7;
                              DUP;
                              DUG 8;
@@ -143,30 +172,11 @@
                              UNIT;
                              TRANSFER_TOKENS;
                              CONS;
-                             DIP { DIG 10; DROP };
-                             DUG 10;
-                             DIG 10;
-                             DUP;
+                             DIP { DIG 11; DROP };
                              DUG 11;
-                             DIG 6;
-                             DUP;
-                             DUG 7;
-                             CONTRACT unit;
-                             IF_NONE
-                               { PUSH string "BadContract";
-                                 FAILWITH }
-                               {  };
-                             DIG 5;
-                             DUP;
-                             DUG 6;
-                             UNIT;
-                             TRANSFER_TOKENS;
-                             CONS;
-                             DIP { DIG 10; DROP };
-                             DUG 10;
                              PUSH nat 4;
-                             DIP { DIG 1; DROP };
-                             DUG 1 }
+                             DIP { DIG 2; DROP };
+                             DUG 2 }
                            {  } }
                        { PUSH string "InvalidState";
                          FAILWITH };
@@ -187,12 +197,14 @@
                      PAIR;
                      SWAP;
                      PAIR;
+                     SWAP;
+                     PAIR;
                      DIG 1;
                      PAIR }
                    { DROP;
-                     DIG 4;
+                     DIG 5;
                      DUP;
-                     DUG 5;
+                     DUG 6;
                      SENDER;
                      COMPARE;
                      EQ;
@@ -201,37 +213,41 @@
                        { PUSH string "InvalidCaller";
                          FAILWITH }
                        {  };
+                     DIG 1;
                      DUP;
+                     DUG 2;
                      DUP;
                      PUSH nat 2;
                      COMPARE;
                      EQ;
                      IF
-                       { DIG 10;
+                       { DIG 11;
                          DUP;
-                         DUG 11;
-                         DIG 8;
+                         DUG 12;
+                         DIG 9;
                          DUP;
-                         DUG 9;
+                         DUG 10;
                          CONTRACT unit;
                          IF_NONE
                            { PUSH string "BadContract";
                              FAILWITH }
                            {  };
-                         DIG 6;
+                         DIG 7;
                          DUP;
-                         DUG 7;
+                         DUG 8;
                          UNIT;
                          TRANSFER_TOKENS;
                          CONS;
-                         DIP { DIG 10; DROP };
-                         DUG 10;
+                         DIP { DIG 11; DROP };
+                         DUG 11;
                          PUSH nat 3;
-                         DIP { DIG 1; DROP };
-                         DUG 1 }
+                         DIP { DIG 2; DROP };
+                         DUG 2 }
                        { PUSH string "InvalidState";
                          FAILWITH };
                      DROP;
+                     SWAP;
+                     PAIR;
                      SWAP;
                      PAIR;
                      SWAP;

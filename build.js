@@ -15,13 +15,14 @@ switch(contractName) {
 
 const basePath = join(__dirname, subdirName, contractName);
 const inputPath = join(basePath, `${contractName}.arl`);
+const metadataPath = join(basePath, `${contractName}.json`);
 if (!existsSync(inputPath)) throw new Error(`${contractName}.arl does not exist`);
 
 async function compile(targetName, targetExt) {
     try {
         await new Promise((resolve, reject) => {
             const outputPath = join(basePath, `${contractName}.${targetExt}`);
-            const command = `archetype -t ${targetName} ${inputPath} > ${outputPath}`;
+            const command = `archetype -t ${targetName} ${inputPath} --metadata-storage ${metadataPath} > ${outputPath}`;
             exec(command, (error, stdout) => {
                 if (error) reject(error);
                 else resolve(stdout);

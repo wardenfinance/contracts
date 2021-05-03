@@ -23,10 +23,30 @@ module Escrow_storage
    | FFee
    | FDeadline
    | F_state
+   | FMetadata
   
   clone archetype.Trace as Tr with type _asset = _asset,
                                    type _entry = _entry,
                                    type _field = _field
+  
+  let function eq_map0 (e1 : (arstring, bytes)) (e2 : (arstring, bytes)) : bool
+  = match (e1 , e2) with
+    | ((e10),(e11)),((e20),(e21)) -> if ((str_eq e10 e20) && (str_eq e11 e21)) then begin 
+                                       true  
+                                     end else begin 
+                                       false  
+                                     end
+    |( _),( _) -> false 
+    end
+  
+  let function le_map0 (e1 : arstring) (e2 : arstring) : bool
+  = str_le e1 e2
+  
+  clone archetype.Collection as Map0 with type t = (arstring, bytes),
+                                          type tk = arstring,
+                                          val keyt = fst,
+                                          val eqt = eq_map0,
+                                          val lek = le_map0
   
   type _storage = {
     mutable title : arstring;
@@ -38,6 +58,7 @@ module Escrow_storage
     mutable fee : tez;
     mutable deadline : int;
     mutable _state : nat;
+    mutable metadata : Map0.collection;
     mutable _ops : L.list operation;
     mutable _balance : tez;
     _transferred : tez;
@@ -73,6 +94,7 @@ module Escrow_storage
     fee = fee;
     deadline = deadline;
     _state = 0;
+    metadata = Map0.from_list (L.Cons (("" , "74657a6f732d73746f726167653a68657265")) (L.Cons (("here" , "7b0a20202020226e616d65223a2022457363726f77222c0a20202020226465736372697074696f6e223a2022457363726f7720636f6e7472616374207769746820646561646c696e65206265747765656e206120627579657220616e6420612073656c6c65722c20616e642076616c69646174656420627920616e206f7261636c652e222c0a202020202276657273696f6e223a2022302e31222c0a20202020226c6963656e7365223a202247504c2d332e30222c0a2020202022617574686f7273223a205b0a2020202020202020224d61747468657720446f776e73203c6d6174746865774077617264656e2e66696e616e63653e220a202020205d2c0a2020202022686f6d6570616765223a202268747470733a2f2f6769746875622e636f6d2f77617264656e66696e616e63652f636f6e7472616374732f64796e616d69632f657363726f77220a7d")) (L.Nil)));
     _ops = L.Nil;
     _balance = 0;
     _transferred = 0;
@@ -100,6 +122,7 @@ module Escrow_storage
       fee = _s_storage.fee;
       deadline = _s_storage.deadline;
       _state = _s_storage._state;
+      metadata = _s_storage.metadata;
       _ops = _s_storage._ops;
       _balance = _s_storage._balance;
       _transferred = _s_storage._transferred;
