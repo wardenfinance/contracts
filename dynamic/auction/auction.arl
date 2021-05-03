@@ -1,8 +1,23 @@
 archetype auction(
-    auctioneer : role,
+    auctioneer  : role,
+    title       : string,
+    description : string,
+    image_url   : string,
     initial_bid : tez,
-    deadline : date
+    deadline    : date
 )
+
+record info {
+    info_title : string;
+    info_description : string;
+    info_image_url : string;
+}
+
+variable information : info = {
+    title;
+    description;
+    image_url
+}
 
 asset bid identified by bidder {
     bidder : address;
