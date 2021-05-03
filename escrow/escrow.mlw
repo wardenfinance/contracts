@@ -1,0 +1,234 @@
+module Escrow_storage
+  use archetype.Lib
+  
+  use list.List as L
+  
+  use archetype.Field as F
+  
+  use archetype.View as V
+  
+  type _entry =
+   | EAbort
+   | EConfirm
+   | EComplete
+   | ECancel
+  
+  type _field =
+   | FTitle
+   | FDescription
+   | FBuyer
+   | FSeller
+   | FOracle
+   | FPrice
+   | FFee
+   | FDeadline
+   | F_state
+  
+  clone archetype.Trace as Tr with type _asset = _asset,
+                                   type _entry = _entry,
+                                   type _field = _field
+  
+  type _storage = {
+    mutable title : arstring;
+    mutable description : arstring;
+    mutable buyer : role;
+    mutable seller : role;
+    mutable oracle : role;
+    mutable price : tez;
+    mutable fee : tez;
+    mutable deadline : int;
+    mutable _state : nat;
+    mutable _ops : L.list operation;
+    mutable _balance : tez;
+    _transferred : tez;
+    _caller : address;
+    _source : address;
+    _now : date;
+    _chainid : chain_id;
+    _selfaddress : address;
+    _entry : option _entry;
+    mutable _tr : Tr._traces 
+  } invariant {
+    [@expl:s1]
+    buyer <> seller 
+  }
+  invariant {
+    [@expl:s2]
+    buyer <> oracle 
+  }
+  invariant {
+    [@expl:s3]
+    _balance <= price + fee 
+  }
+  invariant {
+    [@expl:s4]
+    _s._now <= deadline  
+  } by {
+    title = title;
+    description = description;
+    buyer = buyer;
+    seller = seller;
+    oracle = oracle;
+    price = price;
+    fee = fee;
+    deadline = deadline;
+    _state = 0;
+    _ops = L.Nil;
+    _balance = 0;
+    _transferred = 0;
+    _caller = "";
+    _source = "";
+    _now = 0;
+    _chainid = 0;
+    _selfaddress = "";
+    _entry = None;
+    _tr = L.Nil 
+  }
+  
+  let function _cp_storage (_s_storage : _storage) : _storage
+  ensures {
+    [@expl:cp_1]
+    result = _s_storage  
+  }
+  = {
+      title = _s_storage.title;
+      description = _s_storage.description;
+      buyer = _s_storage.buyer;
+      seller = _s_storage.seller;
+      oracle = _s_storage.oracle;
+      price = _s_storage.price;
+      fee = _s_storage.fee;
+      deadline = _s_storage.deadline;
+      _state = _s_storage._state;
+      _ops = _s_storage._ops;
+      _balance = _s_storage._balance;
+      _transferred = _s_storage._transferred;
+      _caller = _s_storage._caller;
+      _source = _s_storage._source;
+      _now = _s_storage._now;
+      _chainid = _s_storage._chainid;
+      _selfaddress = _s_storage._selfaddress;
+      _entry = _s_storage._entry;
+      _tr = _s_storage._tr
+    }
+  
+  val ref _s : _storage
+end
+module Escrow
+  use archetype.Lib
+  
+  use list.List as L
+  
+  use Escrow_storage
+  
+  let abort () : unit
+  raises { InvalidCaller }
+  raises { InvalidState }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EAbort) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (str_eq (_s._caller) _s.buyer || str_eq (_s._caller) _s.seller) then begin 
+      raise InvalidCaller  
+    end;
+    let _tmp = _s._state in
+    if 0 = _tmp then begin 
+      _s._state <- 1  
+    end else begin 
+      raise InvalidState  
+    end
+  
+  let confirm () : unit
+  raises { InvalidState }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EConfirm) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil  
+  }
+  = let _s_init = _cp_storage (_s) in
+    let _tmp = _s._state in
+    if 0 = _tmp then begin 
+      if _s._balance = (_s.price + _s.fee) then begin 
+        _s._state <- 2  
+      end  
+    end else begin 
+      raise InvalidState  
+    end
+  
+  let complete () : unit
+  raises { InvalidCaller }
+  raises { InvalidState }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some EComplete) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (str_eq (_s._caller) _s.oracle) then begin 
+      raise InvalidCaller  
+    end;
+    let _tmp = _s._state in
+    if 2 = _tmp then begin 
+      if _s._now < _s.deadline then begin 
+        _s._ops <- L.Cons (_mk_transfer (_s.seller) (_s.price)) _s._ops;
+        _s._balance <- _s._balance - _s.price;
+        _s._ops <- L.Cons (_mk_transfer (_s.oracle) (_s.fee)) _s._ops;
+        _s._balance <- _s._balance - _s.fee;
+        _s._state <- 4  
+      end  
+    end else begin 
+      raise InvalidState  
+    end
+  
+  let cancel () : unit
+  raises { InvalidCaller }
+  raises { InvalidState }
+  requires {
+    [@expl:entry_require]
+    _s._entry = (Some ECancel) 
+  }
+  requires {
+   [@expl:empty_ops]
+   _s._ops = L.Nil 
+  }
+  requires {
+   [@expl:empty_trace]
+   _s._tr = L.Nil  
+  }
+  = let _s_init = _cp_storage (_s) in
+    if not (str_eq (_s._caller) _s.oracle) then begin 
+      raise InvalidCaller  
+    end;
+    let _tmp = _s._state in
+    if 2 = _tmp then begin 
+      _s._ops <- L.Cons (_mk_transfer (_s.buyer) (_s.price)) _s._ops;
+      _s._balance <- _s._balance - _s.price;
+      _s._state <- 3  
+    end else begin 
+      raise InvalidState  
+    end
+end
+
