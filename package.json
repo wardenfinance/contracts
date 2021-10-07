@@ -24,7 +24,7 @@
   },
   "homepage": "https://warden.finance",
   "devDependencies": {
-    "@taquito/signer": "^9.2.0",
+    "@taquito/signer": "^10.2.0",
     "@taquito/taquito": "^9.0.1"
   }
 }
